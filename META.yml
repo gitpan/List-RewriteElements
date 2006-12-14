@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:                List-RewriteElements
-version:             0.04
+version:             0.05
 abstract:            Create a new list by rewriting elements of a first list
 license:             ~
 generated_by:        ExtUtils::MakeMaker version 6.31

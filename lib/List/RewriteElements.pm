@@ -1,6 +1,6 @@
 package List::RewriteElements;
-#$Id: RewriteElements.pm 1111 2006-12-14 04:05:19Z jimk $
-$VERSION = 0.04;
+#$Id: RewriteElements.pm 1113 2006-12-14 12:41:57Z jimk $
+$VERSION = 0.05;
 use strict;
 use warnings;
 use Carp;
@@ -83,13 +83,6 @@ sub new {
     $self->{records_deleted} = 0;
     return $self;
 }
-
-#    $output_row_count       = $lre->get_total_rows();
-#    $output_record_count    = $lre->get_total_records();
-#    $records_changed        = $lre->get_records_changed();
-#    $records_unchanged      = $lre->get_records_unchanged();
-#    $records_deleted        = $lre->get_records_deleted();
-#    $header_status          = $lre->get_header_status();
 
 sub generate_output {
     my $self = shift;
@@ -607,12 +600,12 @@ C<header_suppress> criterion:  return value C<-1>;
 
 no header row in the source:  return value C<undef>.
 
-<Arguments:>  None.
+=back
+
+B<Arguments:>  None.
 
 B<Return Value:>  Numerical flag:  C<1>, C<0>, C<-1> or C<undef> as described
 above.
-
-=back
 
 =head1 FAQ
 
@@ -636,7 +629,7 @@ also wouldn't get the statistical report methods.
 Why do you care?  Why do you want to look inside the black box?  If you really
 want to know, read the source!
 
-=head2 PREREQUISITES
+=head1 PREREQUISITES
 
 List::RewriteElements relies only on modules distributed with the Perl core as
 of 5.8.0.  IO::Capture::Stdout is required for the test suite, but a copy is
@@ -647,6 +640,10 @@ included in the distribution under the F<t/> directory.
 None known at this time.  File bug reports at L<http://rt.cpan.org>.
 
 =head1 HISTORY
+
+0.05 Thu Dec 14 07:42:24 EST 2006
+    - Correction of POD formatting errors only; no change in functionality.
+CPAN upload.
 
 0.04 Wed Dec 13 23:04:33 EST 2006
     - More tests; fine-tuning of code and documentation.  First CPAN upload.
