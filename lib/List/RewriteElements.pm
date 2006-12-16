@@ -1,6 +1,6 @@
 package List::RewriteElements;
-#$Id: RewriteElements.pm 1113 2006-12-14 12:41:57Z jimk $
-$VERSION = 0.05;
+#$Id: RewriteElements.pm 1116 2006-12-16 16:58:06Z jimk $
+$VERSION = 0.06;
 use strict;
 use warnings;
 use Carp;
@@ -64,7 +64,6 @@ sub new {
     my $self = bless ($argsref, $class);
 
     $self->{rows_in} = scalar(@{$self->{working}});
-#    if (defined $self->{header_rule} or defined $self->{header_suppress}) {
     if (defined $self->{header_rule}) {
         $self->{records_in} = $self->{rows_in} - 1;
     } else {
@@ -146,9 +145,6 @@ sub _body_rule_handler {
         }
         my $newel = &{$self->{body_rule}}($el);
         print "$newel\n";
-#        if ($el ne $newel) {
-#            $self->{records_changed}++;
-#        }
         $self->{records_changed}++ if $el ne $newel;
     }
 }
@@ -441,47 +437,6 @@ output at all.
 
 =item * Note 3
 
-If a C<header_rule>, C<body_rule>, C<header_suppress> or C<body_suppress>
-either (a) needs additional information from the external environment above
-and beyond that contained in the individual data record or (b) needs to cause
-a change in the external environment, write a closure and call that closure
-insider the rule.  Example:
-
-    my @greeks = qw( alpha beta gamma );
-    
-    my $get_a_greek = sub {
-        return (shift @greeks);
-    };
-
-    my $lre  = List::RewriteElements->new ( {
-        list        => [ map {"$_\n"} (1..5) ],
-        body_rule   => sub {
-            my $record = shift;
-            my $rv;
-            chomp $record;
-            if ($record eq '4') {
-                $rv = &{$get_a_greek};
-            } else {
-                $rv = (10 * $record);
-            }
-            return $rv;
-        },
-        body_suppress   => sub {
-            my $record = shift;
-            chomp $record;
-            return if $record eq '5';
-        },
-    } );
-
-    $lre->generate_output();
-
-This will produce:
-
-    10
-    20
-    30
-    alpha
-
 =back
 
 B<Return Value:>  List::RewriteElements object.
@@ -609,6 +564,93 @@ above.
 
 =head1 FAQ
 
+=head2  Can I simultaneously rewrite records and interact with the external environment?
+
+Yes.  If a C<header_rule>, C<body_rule>, C<header_suppress> or C<body_suppress>
+either (a) needs additional information from the external environment above
+and beyond that contained in the individual data record or (b) needs to cause
+a change in the external environment, you can write a closure and call that 
+closure insider the rule.
+
+Example:
+
+    my @greeks = qw( alpha beta gamma );
+    
+    my $get_a_greek = sub {
+        return (shift @greeks);
+    };
+
+    my $lre  = List::RewriteElements->new ( {
+        list        => [ map {"$_\n"} (1..5) ],
+        body_rule   => sub {
+            my $record = shift;
+            my $rv;
+            chomp $record;
+            if ($record eq '4') {
+                $rv = &{$get_a_greek};
+            } else {
+                $rv = (10 * $record);
+            }
+            return $rv;
+        },
+        body_suppress   => sub {
+            my $record = shift;
+            chomp $record;
+            return if $record eq '5';
+        },
+    } );
+
+    $lre->generate_output();
+
+This will produce:
+
+    10
+    20
+    30
+    alpha
+
+=head2 Can I use List-Rewrite Elements with fixed-width data?
+
+Yes.  Suppose that you have this fixed-width data (adapted from Dave Cross'
+I<Data Munging with Perl>:
+
+    my @dataset = (
+        q{00374Bloggs & Co       19991105100103+00015000},
+        q{00375Smith Brothers    19991106001234-00004999},
+        q{00376Camel Inc         19991107289736+00002999},
+        q{00377Generic Code      19991108056789-00003999},
+    );
+
+Suppose further that you need to update certain records and that C<%revisions>
+holds the data for updating:
+
+    my %revisions = (
+        376 => [ 'Camel Inc', 20061107, 388293, '+', 4999 ],
+        377 => [ 'Generic Code', 20061108, 99821, '-',  6999 ],
+    );
+
+Write a C<body_rule> subroutine which uses C<unpack>, C<pack> and C<sprintf>
+as needed to update the records.
+
+    my $lre  = List::RewriteElements->new ( {
+        list        => \@dataset,
+        body_rule   => sub {
+            my $record = shift;
+            my $template = 'A5A18A8A6AA8';
+            my @rec  = unpack($template, $record);
+            $rec[0] =~ s/^0+//;
+            my ($acctno, %values, $result);
+            $acctno = $rec[0];
+            $values{$acctno} = [ @rec[1..$#rec] ];
+            if ($revisions{$acctno}) {
+                $values{$acctno} = $revisions{$acctno};
+            }
+            $result = sprintf  "%05d%-18s%8d%06d%1s%08d",
+                ($acctno, @{$values{$acctno}});
+            return $result;
+        },
+    } );
+
 =head2 How does this differ from Tie::File?
 
 Mark Jason Dominus' Tie::File module is one of my Fave 5 CPAN modules.  It's
@@ -641,6 +683,10 @@ None known at this time.  File bug reports at L<http://rt.cpan.org>.
 
 =head1 HISTORY
 
+0.06 Sat Dec 16 11:31:38 EST 2006
+    - Created t/07_fixed_width.t and t/testlib/fixed.t to illustrate use of 
+List::RewriteElements with fixed-width data.
+
 0.05 Thu Dec 14 07:42:24 EST 2006
     - Correction of POD formatting errors only; no change in functionality.
 CPAN upload.
@@ -649,7 +695,7 @@ CPAN upload.
     - More tests; fine-tuning of code and documentation.  First CPAN upload.
 
 0.03 Tue Dec 12 22:13:00 EST 2006
-    - Implementation of statistica methods; more tests.
+    - Implementation of statistical methods; more tests.
 
 0.02 Mon Dec 11 19:38:26 EST 2006
     - Added tests to demonstrate use of closures to supply additional
@@ -657,6 +703,15 @@ information to elements such as body_rule.
 
 0.01 Sat Dec  9 22:29:51 2006
     - original version; created by ExtUtils::ModuleMaker 0.47
+
+=head1 ACKNOWLEDGEMENTS
+
+Thanks to David Landgren for raising the question of use of
+List-RewriteElements with fixed-width data.
+
+I then adapted an example from Dave Cross' I<Data Munging with Perl>,
+Chapter 7.1, "Fixed-width Data," to provide a test
+demonstrating processing of fixed-width data.
 
 =head1 AUTHOR
 
@@ -673,6 +728,10 @@ it and/or modify it under the same terms as Perl itself.
 
 The full text of the license can be found in the
 LICENSE file included with this module.
+
+=head1 SEE ALSO
+
+David Cross, I<Data Munging with Perl> (Manning, 2001).
 
 =cut
 
