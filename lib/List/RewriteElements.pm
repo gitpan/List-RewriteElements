@@ -1,12 +1,13 @@
 package List::RewriteElements;
-#$Id: RewriteElements.pm 1116 2006-12-16 16:58:06Z jimk $
-$VERSION = 0.06;
+#$Id: RewriteElements.pm 1118 2006-12-31 16:18:44Z jimk $
+$VERSION = 0.07;
 use strict;
 use warnings;
 use Carp;
-use Cwd qw(cwd realpath);
+use Cwd;
 use File::Basename;
 use File::Copy;
+use File::Spec;
 use Tie::File;
 
 sub new {
@@ -97,8 +98,8 @@ sub generate_output {
         if (defined $self->{output_file}) {
             $outfile = $self->{output_file};
         } else {
-            $outfile = cwd() . '/' . basename($self->{file})
-                . $self->{output_suffix};
+            $outfile = File::Spec->catfile( ( cwd() ),
+                basename($self->{file}) . $self->{output_suffix} );
         }
         open my $OUT, ">$outfile"
             or croak "Unable to open $outfile for writing";
@@ -107,7 +108,7 @@ sub generate_output {
         close $OUT 
             or croak "Unable to close $outfile after writing";
         select $oldfh;
-        $self->{output_path} = realpath($outfile);
+        $self->{output_path} = $outfile;
         $self->{output_basename} = basename($self->{output_path});
     }
     $self->{records_out} = $self->{records_in} - $self->{records_deleted};
@@ -612,7 +613,7 @@ This will produce:
 =head2 Can I use List-Rewrite Elements with fixed-width data?
 
 Yes.  Suppose that you have this fixed-width data (adapted from Dave Cross'
-I<Data Munging with Perl>:
+I<Data Munging with Perl>):
 
     my @dataset = (
         q{00374Bloggs & Co       19991105100103+00015000},
@@ -682,6 +683,12 @@ included in the distribution under the F<t/> directory.
 None known at this time.  File bug reports at L<http://rt.cpan.org>.
 
 =head1 HISTORY
+
+0.07 Sun Dec 31 11:13:04 EST 2006
+    - Switched to using File::Spec::catfile() to generate one path (rather
+than Cwd::realpath().  This was done in an attempt to respond to corion's FAIL
+reports (but I don't have a good Windows box, so I can't be certain of the
+results).
 
 0.06 Sat Dec 16 11:31:38 EST 2006
     - Created t/07_fixed_width.t and t/testlib/fixed.t to illustrate use of 

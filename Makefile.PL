@@ -1,4 +1,4 @@
-#$Id: Makefile.PL 1103 2006-12-12 01:13:29Z jimk $
+#$Id: Makefile.PL 1120 2006-12-31 16:20:24Z jimk $
 
 
 use ExtUtils::MakeMaker;
@@ -11,8 +11,10 @@ WriteMakefile(
     ABSTRACT     => 'Create a new list by rewriting elements of a first list',
     PREREQ_PM    => {
                      'Carp'             => 0,
+                     'Cwd'              => 0,
                      'File::Basename'   => 0,
                      'File::Copy'       => 0,
+                     'File::Spec'       => 0,
                      'File::Temp'       => 0,
                      'Test::Simple'     => 0.44,
                      'Tie::File'        => 0,
