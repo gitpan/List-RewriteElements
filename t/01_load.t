@@ -1,6 +1,8 @@
 # -*- perl -*-
-#$Id: 01_load.t 1110 2006-12-14 03:56:31Z jimk $
+#$Id: 01_load.t 1121 2007-01-01 14:43:51Z jimk $
 # t/01_load.t - check module loading and test constructor
+use strict;
+use warnings;
 
 use Test::More tests => 14;
 use_ok( 'List::RewriteElements' );

@@ -1,14 +1,18 @@
 # -*- perl -*-
-#$Id: 03_file.t 1110 2006-12-14 03:56:31Z jimk $
+#$Id: 03_file.t 1121 2007-01-01 14:43:51Z jimk $
 # t/03_file.t - test what happens when source is a file
+use strict;
+use warnings;
 
-use Test::More tests => 36;
+use Test::More tests => 37;
 use_ok( 'List::RewriteElements' );
 use lib ( "t/testlib" );
 use_ok( 'IO::Capture::Stdout' );
 use_ok( 'Cwd' );
 use_ok( 'File::Basename' );
+use_ok( 'File::Spec' );
 use_ok( 'File::Temp', qw| tempdir | );
+use Carp;
 
 my $lre;
 my @lines;
@@ -51,10 +55,14 @@ is($lines[-1], q{100}, "Last element of list is correct");
     ok(-f $output, "Output file created");
 
     my @lines;
-    tie @lines, 'Tie::File', $output;
+    open my $FH, $output or croak "Unable to open $output for reading";
+    while (<$FH>) {
+        chomp;
+        push @lines, $_;
+    }
+    close $FH or croak "Unable to close $output";
     is($lines[0], q{10}, "First element of list is correct");
     is($lines[-1], q{100}, "Last element of list is correct");
-    untie @lines;
 
     ok(chdir $cwd, 'changed back to original directory after testing');
 }
@@ -96,7 +104,7 @@ is($lines[-1], q{100}, "Last element of list is correct");
         "Total number of records deleted is not yet determined");
 
     $lre->generate_output();
-    my $output = cwd() . q{/} . basename($source) . $suffix;
+    my $output = File::Spec->catfile( cwd(), basename($source) . $suffix );
     ok(-f $output, "Output file created");
     is($lre->get_output_path(), $output,
         "Output path correctly reported");
@@ -104,10 +112,14 @@ is($lines[-1], q{100}, "Last element of list is correct");
         "Output basename correctly reported");
 
     my @lines;
-    tie @lines, 'Tie::File', $output;
+    open my $FH, $output or croak "Unable to open $output for reading";
+    while (<$FH>) {
+        chomp;
+        push @lines, $_;
+    }
+    close $FH or croak "Unable to close $output";
     is($lines[0], q{10}, "First element of list is correct");
     is($lines[-1], q{100}, "Last element of list is correct");
-    untie @lines;
 
     ok(chdir $cwd, 'changed back to original directory after testing');
 }
@@ -136,7 +148,12 @@ is($lines[-1], q{100}, "Last element of list is correct");
     ok(-f $output, "'output_file' took precedence over 'output_suffix");
 
     my @lines;
-    tie @lines, 'Tie::File', $output;
+    open my $FH, $output or croak "Unable to open $output for reading";
+    while (<$FH>) {
+        chomp;
+        push @lines, $_;
+    }
+    close $FH or croak "Unable to close $output";
     is($lines[0], q{10}, "First element of list is correct");
     is($lines[-1], q{100}, "Last element of list is correct");
     untie @lines;

@@ -1,6 +1,8 @@
 # -*- perl -*-
 #$Id: 07_fixed_width.t 1110 2006-12-14 03:56:31Z jimk $
 # t/07_fixed_width.tt - test what happens with fixed width records
+use strict;
+use warnings;
 
 use Test::More qw(no_plan); # tests => 35;
 use_ok( 'List::RewriteElements' );

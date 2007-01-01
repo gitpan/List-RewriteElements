@@ -1,15 +1,16 @@
 # -*- perl -*-
-#$Id: 06_header_suppress.t 1110 2006-12-14 03:56:31Z jimk $
+#$Id: 06_header_suppress.t 1121 2007-01-01 14:43:51Z jimk $
 # t/06_header_suppress.tt - test what happens when header_suppress element is supplied
+use strict;
+use warnings;
 
-use Test::More tests =>  95;
+use Test::More tests =>  93;
 use_ok( 'List::RewriteElements' );
 use_ok( 'Cwd' );
 use_ok( 'File::Temp', qw| tempdir | );
-use_ok( 'Tie::File' );
-use_ok( 'Carp' );
 use lib ( "t/testlib" );
 use_ok( 'IO::Capture::Stdout' );
+use Carp;
 
 my $lre;
 my @lines;
@@ -160,11 +161,15 @@ is($lines[-1], q{100}, "Last element of list is correct");
         "Header status unchanged");
 
     my @lines;
-    tie @lines, 'Tie::File', $output;
+    open my $FH, $output or croak "Unable to open $output for reading";
+    while (<$FH>) {
+        chomp;
+        push @lines, $_;
+    }
+    close $FH or croak "Unable to close $output";
     is($lines[0], q{ALPHA}, "Header is correct; no suppression");
     is($lines[1], q{10}, "First element of list is correct");
     is($lines[-1], q{100}, "Last element of list is correct");
-    untie @lines;
     
     ok(chdir $cwd, 'changed back to original directory after testing');
 }

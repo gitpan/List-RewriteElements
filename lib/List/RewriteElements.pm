@@ -1,6 +1,6 @@
 package List::RewriteElements;
-#$Id: RewriteElements.pm 1118 2006-12-31 16:18:44Z jimk $
-$VERSION = 0.07;
+#$Id: RewriteElements.pm 1122 2007-01-01 14:45:48Z jimk $
+$VERSION = 0.08;
 use strict;
 use warnings;
 use Carp;
@@ -55,7 +55,7 @@ sub new {
 
     if ($argsref->{file}) {
         my @elements;
-        tie @elements, 'Tie::File', $argsref->{file}
+        tie @elements, 'Tie::File', $argsref->{file}, recsep => $/
             or croak "Unable to tie to $argsref->{file}";
         $argsref->{working} = \@elements;
     } else {
@@ -683,6 +683,11 @@ included in the distribution under the F<t/> directory.
 None known at this time.  File bug reports at L<http://rt.cpan.org>.
 
 =head1 HISTORY
+
+0.08 Mon Jan  1 08:54:01 EST 2007
+    - xdg to the rescue!  Applied and extended patches supplied by David
+Golden for Win32.  In constructor, value of C<$/> is supplied to the C<recsep>
+option.
 
 0.07 Sun Dec 31 11:13:04 EST 2006
     - Switched to using File::Spec::catfile() to generate one path (rather
