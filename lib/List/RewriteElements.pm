@@ -1,6 +1,6 @@
 package List::RewriteElements;
-#$Id: RewriteElements.pm 1122 2007-01-01 14:45:48Z jimk $
-$VERSION = 0.08;
+#$Id: RewriteElements.pm 1123 2007-01-23 03:39:35Z jimk $
+$VERSION = 0.09;
 use strict;
 use warnings;
 use Carp;
@@ -683,6 +683,11 @@ included in the distribution under the F<t/> directory.
 None known at this time.  File bug reports at L<http://rt.cpan.org>.
 
 =head1 HISTORY
+
+0.09 Mon Jan 22 22:35:56 EST 2007
+    - Update version number and release date only.  Purpose:  generate new
+round of tests by cpan testers, in the hope that it eliminates a FAIL report
+on v0.08 where failure was due solely to error on tester's box.
 
 0.08 Mon Jan  1 08:54:01 EST 2007
     - xdg to the rescue!  Applied and extended patches supplied by David
